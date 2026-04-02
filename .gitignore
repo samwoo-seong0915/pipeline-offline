@@ -4,3 +4,5 @@ node_modules/
 .DS_Store
 clinic-preconsult-launch/pilot.db
 clinic-preconsult-launch/__pycache__/
+beauty-precheckin/pilot.db
+beauty-precheckin/__pycache__/
