@@ -2,3 +2,5 @@
 .wrangler/
 node_modules/
 .DS_Store
+clinic-preconsult-launch/pilot.db
+clinic-preconsult-launch/__pycache__/
