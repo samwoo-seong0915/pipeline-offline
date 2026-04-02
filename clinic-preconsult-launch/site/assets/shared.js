@@ -1,7 +1,7 @@
-import { BRAND, getBusiness, getVertical } from './config.js';
+import { BRAND, WEDGE } from './config.js';
 
 const API_BASE = '/api';
-const FALLBACK_KEY = 'precheckin.local-store.v1';
+const FALLBACK_KEY = 'precheckin.beauty.local.v2';
 
 function nowIso() {
   return new Date().toISOString();
@@ -80,23 +80,16 @@ async function apiFetch(path, options = {}) {
   }
 
   const contentType = response.headers.get('content-type') || '';
-  if (contentType.includes('application/json')) {
-    return response.json();
-  }
+  if (contentType.includes('application/json')) return response.json();
   return response.text();
 }
 
-export function formatTimestamp(value) {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+export function buildIntakeLink() {
+  return `./intake.html?vertical=${encodeURIComponent(WEDGE.vertical)}&business=${encodeURIComponent(WEDGE.businessSlug)}`;
+}
+
+export function buildAdminLink() {
+  return `./admin.html?vertical=${encodeURIComponent(WEDGE.vertical)}&business=${encodeURIComponent(WEDGE.businessSlug)}`;
 }
 
 export function getQueryParams() {
@@ -105,47 +98,29 @@ export function getQueryParams() {
 
 export function resolveExperience() {
   const params = getQueryParams();
-  const vertical = params.get('vertical') || 'clinic';
-  const business = getBusiness(params.get('business'), vertical);
-  const verticalConfig = getVertical(business.vertical || vertical);
-
   return {
-    params,
-    vertical: verticalConfig,
-    business,
+    vertical: params.get('vertical') || WEDGE.vertical,
+    businessSlug: params.get('business') || WEDGE.businessSlug,
+    businessName: WEDGE.businessName,
     brand: BRAND,
   };
 }
 
-export function buildIntakeLink(verticalSlug, businessSlug) {
-  return `./intake.html?vertical=${encodeURIComponent(verticalSlug)}&business=${encodeURIComponent(businessSlug)}`;
-}
-
-export function buildAdminLink(verticalSlug, businessSlug) {
-  return `./admin.html?vertical=${encodeURIComponent(verticalSlug)}&business=${encodeURIComponent(businessSlug)}`;
-}
-
-export function createSessionSeed(verticalSlug, businessSlug) {
+export function createSessionSeed() {
   return {
     sessionId: randomId(),
-    vertical: verticalSlug,
-    businessSlug,
+    vertical: WEDGE.vertical,
+    businessSlug: WEDGE.businessSlug,
+    businessName: WEDGE.businessName,
     startedAt: nowIso(),
     source: document.referrer || 'direct',
   };
 }
 
 export async function startSession(payload) {
-  const body = {
-    ...payload,
-    status: 'started',
-  };
-
+  const body = { ...payload, status: 'started' };
   try {
-    return await apiFetch('/session/start', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return await apiFetch('/session/start', { method: 'POST', body: JSON.stringify(body) });
   } catch {
     upsertFallbackSession(body);
     pushFallbackEvent('session_started', body);
@@ -154,16 +129,9 @@ export async function startSession(payload) {
 }
 
 export async function saveSessionProgress(payload) {
-  const body = {
-    ...payload,
-    updatedAt: nowIso(),
-  };
-
+  const body = { ...payload, updatedAt: nowIso() };
   try {
-    return await apiFetch('/session/progress', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return await apiFetch('/session/progress', { method: 'POST', body: JSON.stringify(body) });
   } catch {
     upsertFallbackSession(body);
     return { storage: 'local-fallback', ok: true };
@@ -171,17 +139,9 @@ export async function saveSessionProgress(payload) {
 }
 
 export async function completeSession(payload) {
-  const body = {
-    ...payload,
-    status: 'completed',
-    completedAt: nowIso(),
-  };
-
+  const body = { ...payload, status: 'completed', completedAt: nowIso() };
   try {
-    return await apiFetch('/session/complete', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return await apiFetch('/session/complete', { method: 'POST', body: JSON.stringify(body) });
   } catch {
     upsertFallbackSession(body);
     pushFallbackEvent('session_completed', body);
@@ -190,16 +150,9 @@ export async function completeSession(payload) {
 }
 
 export async function trackCtaClick(payload) {
-  const body = {
-    ...payload,
-    ctaClickedAt: nowIso(),
-  };
-
+  const body = { ...payload, ctaClickedAt: nowIso() };
   try {
-    return await apiFetch('/session/cta', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
+    return await apiFetch('/session/cta', { method: 'POST', body: JSON.stringify(body) });
   } catch {
     upsertFallbackSession(body);
     pushFallbackEvent('cta_clicked', body);
@@ -207,75 +160,46 @@ export async function trackCtaClick(payload) {
   }
 }
 
-function filterLocalSessions(store, filters) {
-  const sessions = Object.values(store.sessions);
-  return sessions.filter((item) => {
-    if (filters.vertical && item.vertical !== filters.vertical) return false;
-    if (filters.businessSlug && item.businessSlug !== filters.businessSlug) return false;
-    return true;
-  });
-}
-
-function buildFallbackSummary(filters = {}) {
+function getLocalSummary() {
   const store = readFallbackStore();
-  const sessions = filterLocalSessions(store, filters);
-  const events = store.events.filter((item) => {
-    if (filters.vertical && item.vertical !== filters.vertical) return false;
-    if (filters.businessSlug && item.businessSlug !== filters.businessSlug) return false;
-    return true;
-  });
-
+  const sessions = Object.values(store.sessions).filter((item) => item.businessSlug === WEDGE.businessSlug);
   const started = sessions.length;
   const completed = sessions.filter((item) => item.status === 'completed').length;
   const ctaClicks = sessions.filter((item) => item.ctaClickedAt).length;
-  const completionRate = started ? Math.round((completed / started) * 100) : 0;
-
   return {
     storage: 'local-fallback',
     summary: {
       started,
       completed,
-      completionRate,
+      completionRate: started ? Math.round((completed / started) * 100) : 0,
       ctaClicks,
-      recentEvents: events.length,
     },
-    submissions: sessions
-      .sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || ''))
-      .slice(0, 100),
+    submissions: sessions.sort((a, b) => (b.startedAt || '').localeCompare(a.startedAt || '')).slice(0, 100),
   };
 }
 
-export async function fetchAdminData(filters = {}) {
-  const query = new URLSearchParams();
-  if (filters.vertical) query.set('vertical', filters.vertical);
-  if (filters.businessSlug) query.set('business', filters.businessSlug);
-
+export async function fetchAdminData() {
+  const query = new URLSearchParams({ vertical: WEDGE.vertical, business: WEDGE.businessSlug });
   try {
     const [summary, submissions] = await Promise.all([
       apiFetch(`/admin/summary?${query.toString()}`),
       apiFetch(`/admin/submissions?${query.toString()}`),
     ]);
-    return {
-      storage: 'server',
-      summary,
-      submissions: submissions.items || [],
-    };
+    return { storage: 'server', summary, submissions: submissions.items || [] };
   } catch {
-    return buildFallbackSummary(filters);
+    return getLocalSummary();
   }
 }
 
-export function buildFallbackCsv(filters = {}) {
-  const localData = buildFallbackSummary(filters);
-  const lines = [
-    ['session_id', 'vertical', 'business_slug', 'status', 'started_at', 'completed_at', 'cta_clicked_at', 'answers_json'].join(','),
-  ];
+export function buildFallbackCsv() {
+  const local = getLocalSummary();
+  const lines = [[
+    'session_id', 'status', 'started_at', 'completed_at', 'cta_clicked_at', 'answers_json',
+  ].join(',')];
 
-  localData.submissions.forEach((item) => {
+  local.submissions.forEach((item) => {
     lines.push([
       csvEscape(item.sessionId),
-      csvEscape(item.vertical),
-      csvEscape(item.businessSlug),
       csvEscape(item.status),
       csvEscape(item.startedAt),
       csvEscape(item.completedAt || ''),
@@ -288,8 +212,17 @@ export function buildFallbackCsv(filters = {}) {
 }
 
 export function csvEscape(value) {
-  const stringValue = value == null ? '' : String(value);
-  return `"${stringValue.replaceAll('"', '""')}"`;
+  const text = value == null ? '' : String(value);
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
+export function formatTimestamp(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+  }).format(date);
 }
 
 export function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8') {
