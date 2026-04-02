@@ -10,16 +10,16 @@
 ### 연락 채널 (랜딩페이지 + 문진폼에 들어감)
 | 항목 | 값 | 어디서 만드나 |
 |------|---|-------------|
-| 카카오 비즈니스 채널 ID | `[TODO: _ZeUTxl 형태]` | https://business.kakao.com → 채널 개설 → 채널 홈 URL에서 확인 |
+| 카카오 비즈니스 채널 ID | `_YYpMX` | https://business.kakao.com → 채널 개설 → 채널 홈 URL에서 확인 |
 | 연락용 전화번호 | `010-7574-9857` | 개인 번호 or 비즈 번호 |
 | 연락용 이메일 | `samwoose@gmail.com` | 선택사항 |
-| 서비스 이름 | `[TODO: 프리콘설트 / 상담전정리 등]` | 브랜딩 결정 |
+| 서비스 이름 | `프리체크인` | 브랜딩 결정 |
 
 ### 배포 관련
 | 항목 | 값 | 비고 |
 |------|---|------|
 | Cloudflare 계정 | `있음 (기존 Cloudflare 배포 가능 추정)` | 없으면 https://dash.cloudflare.com 가입 |
-| 원하는 도메인 | `[TODO: preconsult.pages.dev 등]` | Cloudflare Pages 무료 서브도메인 or 커스텀 |
+| 원하는 도메인 | `precheckin.pages.dev` | Cloudflare Pages 무료 서브도메인 or 커스텀 |
 
 ---
 
