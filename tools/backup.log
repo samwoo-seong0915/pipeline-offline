@@ -54351,3 +54351,23 @@ After doing this, you may fix the identity used for this commit with:
  1 file changed, 17 insertions(+)
 To github.com:samwoo-seong0915/pipeline-offline.git
    a4cc1fb..dcaae31  main -> main
+[main ce57ee0] auto-backup: 2026-06-22 22:20
+ Committer: mac <mac@macui-MacBookPro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 17 insertions(+)
+To github.com:samwoo-seong0915/pipeline-offline.git
+   dcaae31..ce57ee0  main -> main
+client_loop: send disconnect: Broken pipe
+send-pack: unexpected disconnect while reading sideband packet
+fatal: the remote end hung up unexpectedly
