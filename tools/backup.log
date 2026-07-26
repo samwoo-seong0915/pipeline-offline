@@ -61259,3 +61259,20 @@ After doing this, you may fix the identity used for this commit with:
  1 file changed, 17 insertions(+)
 To github.com:samwoo-seong0915/pipeline-offline.git
    b84dbab..6e208dc  main -> main
+[main aa8799d] auto-backup: 2026-07-25 09:40
+ Committer: mac <mac@macui-MacBookPro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 17 insertions(+)
+To github.com:samwoo-seong0915/pipeline-offline.git
+   6e208dc..aa8799d  main -> main
