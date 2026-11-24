@@ -104516,3 +104516,24 @@ After doing this, you may fix the identity used for this commit with:
  1 file changed, 17 insertions(+)
 To github.com:samwoo-seong0915/pipeline-offline.git
    9962a4df..619be508  main -> main
+[main 12a8d23f] auto-backup: 2026-11-25 06:00
+ Committer: mac <mac@macui-MacBookPro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 17 insertions(+)
+remote: Internal Server Error        
+remote: Request ID EAD0:0A78:7E914:EADD2:6B05FAD0        
+remote: Time 2026-11-24T21:00:04Z
+To github.com:samwoo-seong0915/pipeline-offline.git
+ ! [remote rejected]   main -> main (Internal Server Error)
+error: failed to push some refs to 'github.com:samwoo-seong0915/pipeline-offline.git'
